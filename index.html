@@ -99,7 +99,7 @@
   }
   .row:last-child { border-bottom: 0.5px solid var(--border); }
   .col1 { width: 100px; flex-shrink: 0; }
-  .col2 { flex: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+  .col2 { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
   .col3 { width: 92px; flex-shrink: 0; text-align: right; }
   .mini-badge {
     display: inline-block; font-size: 11px; font-weight: 600;
@@ -122,10 +122,9 @@
     background: var(--surface-1); color: var(--text-primary); cursor: pointer;
   }
   button.copy-btn:active { transform: scale(0.97); }
-  .copy-wide {
-    width: 100%; margin-top: 12px; margin-bottom: 20px; padding: 10px 12px;
-  }
-  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 18px; line-height: 1.6; text-align: center; }
+  .copy-wrap { text-align: center; margin-top: 40px; margin-bottom: 8px; }
+  .copy-wrap .copy-btn { padding: 10px 18px; }
+  .footnote { font-size: 12px; color: var(--text-muted); margin: 18px 0 0; line-height: 1.6; text-align: center; text-wrap: balance; }
   .footnote code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     background: var(--code-bg); padding: 1px 4px; border-radius: 4px;
@@ -156,19 +155,20 @@
     Only search favorited Pokémon
   </label>
 
-  <button class="copy-btn copy-wide" id="copyAll" type="button">Copy search string for all super-effective types</button>
+  <div class="copy-wrap">
+    <button class="copy-btn" id="copyAll" type="button">Copy search string</button>
+  </div>
+  <p class="footnote" style="margin-top:0;margin-bottom:26px;">This search string will only return the Pokémon in your storage whose fast move and at least one charged move are super-effective against the selected type(s).</p>
 
-  <div class="head-row">
+  <div class="head-row" id="headRow">
     <div class="c1">Weak to:</div>
     <div class="c2">Weakness Breakdown:</div>
     <div class="c3">Total Weakness:</div>
   </div>
   <div id="rows"></div>
 
-  <p class="footnote">
-    This search string will return only the Pokémon in your storage whose fast move and at least one of the charged moves are super-effective against the selected type(s).
-    Built from documented Pokémon GO search syntax (<code>@1</code>/<code>@2</code>/<code>@3</code> move-slot types, <code>&amp;</code>/<code>,</code> operators, <code>favorite</code> tag) — not tested live in-app, so double-check results if a string looks off.
-  </p>
+  <p class="footnote">Built from documented Pokémon GO search syntax (<code>@1</code>/<code>@2</code>/<code>@3</code> move-slot types, <code>&amp;</code>/<code>,</code> operators, <code>favorite</code> tag)</p>
+  <p class="footnote" style="margin-top:26px;">All results should be accurate, but if anything with the search string function or the app itself appears to be broken (or even if you just have a suggestion!) please feel free to reach out.</p>
 
   <p class="footnote footer-credit"><span class="signature">Brohaffey</span><br>for the love of the game</p>
 </div>
@@ -271,6 +271,7 @@ function copyText(str, btn) {
 const t1 = document.getElementById('t1');
 const t2 = document.getElementById('t2');
 const rowsEl = document.getElementById('rows');
+const headRow = document.getElementById('headRow');
 const favCheckbox = document.getElementById('favOnly');
 const copyAllBtn = document.getElementById('copyAll');
 
@@ -290,8 +291,8 @@ function populateT2(excludeType) {
 
 populateT1(null);
 populateT2(null);
-t1.value = 'Water';
-populateT2('Water');
+t1.insertBefore(new Option('Select first typing', 'placeholder'), t1.firstChild);
+t1.value = 'placeholder';
 t2.value = 'none';
 
 let currentWeakTypes = [];
@@ -299,6 +300,18 @@ let currentWeakTypes = [];
 function render() {
   const a = t1.value;
   const b = t2.value === 'none' ? null : t2.value;
+
+  if (a === 'placeholder') {
+    headRow.style.display = 'none';
+    rowsEl.innerHTML = '<p style="margin:24px 0;text-align:center;font-size:15px;font-weight:500;color:var(--text-primary);">Pick a type above to see results.</p>';
+    rowsEl.style.minHeight = '260px';
+    currentWeakTypes = [];
+    copyAllBtn.disabled = true;
+    copyAllBtn.style.opacity = '0.5';
+    return;
+  }
+  headRow.style.display = 'flex';
+  rowsEl.style.minHeight = '';
 
   const results = TYPES.map(atk => ({
     atk,
@@ -329,11 +342,20 @@ copyAllBtn.addEventListener('click', () => {
 });
 
 t1.addEventListener('change', () => {
-  populateT2(t1.value);
+  const placeholderOpt = t1.querySelector('option[value="placeholder"]');
+  if (placeholderOpt && t1.value !== 'placeholder') {
+    placeholderOpt.remove();
+  }
+  populateT2(t1.value === 'placeholder' ? null : t1.value);
   render();
 });
 t2.addEventListener('change', () => {
+  const hadPlaceholder = t1.value === 'placeholder';
   populateT1(t2.value === 'none' ? null : t2.value);
+  if (hadPlaceholder && !t1.querySelector('option[value="placeholder"]')) {
+    t1.insertBefore(new Option('Select first typing', 'placeholder'), t1.firstChild);
+    t1.value = 'placeholder';
+  }
   render();
 });
 render();
