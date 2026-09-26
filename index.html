@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#F8D030">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Type Counters">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+<title>Pokémon GO Counter String Generator</title>
+<style>
+  :root {
+    --surface-0: #f4f3ee;
+    --surface-1: #ffffff;
+    --text-primary: #16150f;
+    --text-secondary: #57564d;
+    --text-muted: #86847a;
+    --border: rgba(20,20,10,0.12);
+    --border-strong: rgba(20,20,10,0.22);
+    --accent-bg: #eef0e6;
+    --code-bg: #eceae0;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --surface-0: #14140f;
+      --surface-1: #1e1e17;
+      --text-primary: #f2f1ea;
+      --text-secondary: #c2c0b3;
+      --text-muted: #8f8d80;
+      --border: rgba(255,255,255,0.14);
+      --border-strong: rgba(255,255,255,0.26);
+      --accent-bg: #262619;
+      --code-bg: #26261b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface-0: #14140f;
+    --surface-1: #1e1e17;
+    --text-primary: #f2f1ea;
+    --text-secondary: #c2c0b3;
+    --text-muted: #8f8d80;
+    --border: rgba(255,255,255,0.14);
+    --border-strong: rgba(255,255,255,0.26);
+    --accent-bg: #262619;
+    --code-bg: #26261b;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 28px 0 4px; }
+  .sub { font-size: 14px; color: var(--text-secondary); margin: 0 0 20px; line-height: 1.5; }
+  .fav-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 16px; user-select: none; justify-content: center;
+  }
+  .fav-toggle input { width: 16px; height: 16px; }
+
+  .type-picker { display: flex; gap: 8px; margin-bottom: 6px; }
+  select {
+    flex: 1;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-primary);
+  }
+  .picker-note { font-size: 12px; color: var(--text-muted); margin: 0 0 16px; text-align: center; }
+
+  .head-row {
+    display: flex; font-size: 12px; color: var(--text-muted);
+    padding: 0 4px; margin-bottom: 4px;
+  }
+  .head-row .c1 { width: 100px; flex-shrink: 0; }
+  .head-row .c2 { flex: 1; text-align: center; }
+  .head-row .c3 { width: 92px; flex-shrink: 0; text-align: right; }
+  #rows { display: flex; flex-direction: column; }
+  .row {
+    display: flex; align-items: center;
+    border-top: 0.5px solid var(--border);
+    padding: 10px 4px; gap: 8px;
+  }
+  .row:last-child { border-bottom: 0.5px solid var(--border); }
+  .col1 { width: 100px; flex-shrink: 0; }
+  .col2 { flex: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+  .col3 { width: 92px; flex-shrink: 0; text-align: right; }
+  .mini-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+  }
+
+  .badge {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 3px 9px; border-radius: 12px; margin: 2px 4px 2px 0;
+    white-space: nowrap;
+  }
+  .mult-badge {
+    display: inline-block; font-size: 12px; font-weight: 500;
+    padding: 3px 10px; border-radius: 6px; min-width: 40px;
+    text-align: center; margin-left: 8px; flex-shrink: 0;
+  }
+  button.copy-btn {
+    font-size: 12px; font-weight: 500; padding: 7px 12px;
+    border-radius: 8px; border: 0.5px solid var(--border-strong);
+    background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+  }
+  button.copy-btn:active { transform: scale(0.97); }
+  .copy-wide {
+    width: 100%; margin-top: 12px; margin-bottom: 20px; padding: 10px 12px;
+  }
+  .footnote { font-size: 12px; color: var(--text-muted); margin-top: 18px; line-height: 1.6; text-align: center; }
+  .footnote code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--code-bg); padding: 1px 4px; border-radius: 4px;
+  }
+  .footer-credit { text-align: center; margin-top: 28px; line-height: 1.2; }
+  .signature {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 28px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 style="text-align:center;">Pokémon GO Counter String Generator</h1>
+  <p class="sub" style="text-align:center;">What typing are you trying to find the weakness for?</p>
+
+  <div class="type-picker">
+    <select id="t1"></select>
+    <select id="t2"></select>
+  </div>
+  <p class="picker-note">Leave the second dropdown on "No second type" for a single-type lookup.</p>
+
+  <label class="fav-toggle">
+    <input type="checkbox" id="favOnly" checked>
+    Only search favorited Pokémon
+  </label>
+
+  <button class="copy-btn copy-wide" id="copyAll" type="button">Copy search string for all super-effective types</button>
+
+  <div class="head-row">
+    <div class="c1">Weak to:</div>
+    <div class="c2">Weakness Breakdown:</div>
+    <div class="c3">Total Weakness:</div>
+  </div>
+  <div id="rows"></div>
+
+  <p class="footnote">
+    This search string will return only the Pokémon in your storage whose fast move and at least one of the charged moves are super-effective against the selected type(s).
+    Built from documented Pokémon GO search syntax (<code>@1</code>/<code>@2</code>/<code>@3</code> move-slot types, <code>&amp;</code>/<code>,</code> operators, <code>favorite</code> tag) — not tested live in-app, so double-check results if a string looks off.
+  </p>
+
+  <p class="footnote footer-credit"><span class="signature">Brohaffey</span><br>for the love of the game</p>
+</div>
+
+<script>
+const T = {
+  Normal:'#A8A878', Fire:'#F08030', Water:'#6890F0', Electric:'#F8D030', Grass:'#78C850',
+  Ice:'#98D8D8', Fighting:'#C03028', Poison:'#A040A0', Ground:'#E0C068', Flying:'#A890F0',
+  Psychic:'#F85888', Bug:'#A8B820', Rock:'#B8A038', Ghost:'#705898', Dragon:'#7038F8',
+  Dark:'#705848', Steel:'#B8B8D0', Fairy:'#EE99AC'
+};
+const DARK = { Normal:'#5c5c47', Fire:'#7a3212', Water:'#213a72', Electric:'#7a5f0c', Grass:'#2e4a1c',
+  Ice:'#2f5555', Fighting:'#4a0f0c', Poison:'#3d1740', Ground:'#5c4a1c', Flying:'#3a2c5c',
+  Psychic:'#5c1230', Bug:'#42460c', Rock:'#463912', Ghost:'#2a2140', Dragon:'#231255',
+  Dark:'#241a12', Steel:'#3c3c50', Fairy:'#5c2436' };
+
+const CHART = {
+  Normal:{Rock:0.5,Steel:0.5,Ghost:0},
+  Fire:{Grass:2,Ice:2,Bug:2,Steel:2,Fire:0.5,Water:0.5,Rock:0.5,Dragon:0.5},
+  Water:{Fire:2,Ground:2,Rock:2,Water:0.5,Grass:0.5,Dragon:0.5},
+  Electric:{Water:2,Flying:2,Electric:0.5,Grass:0.5,Dragon:0.5,Ground:0},
+  Grass:{Water:2,Ground:2,Rock:2,Fire:0.5,Grass:0.5,Poison:0.5,Flying:0.5,Bug:0.5,Dragon:0.5,Steel:0.5},
+  Ice:{Grass:2,Ground:2,Flying:2,Dragon:2,Fire:0.5,Water:0.5,Ice:0.5,Steel:0.5},
+  Fighting:{Normal:2,Ice:2,Rock:2,Dark:2,Steel:2,Poison:0.5,Flying:0.5,Psychic:0.5,Bug:0.5,Fairy:0.5,Ghost:0},
+  Poison:{Grass:2,Fairy:2,Poison:0.5,Ground:0.5,Rock:0.5,Ghost:0.5,Steel:0},
+  Ground:{Fire:2,Electric:2,Poison:2,Rock:2,Steel:2,Grass:0.5,Bug:0.5,Flying:0},
+  Flying:{Grass:2,Fighting:2,Bug:2,Electric:0.5,Rock:0.5,Steel:0.5},
+  Psychic:{Fighting:2,Poison:2,Psychic:0.5,Steel:0.5,Dark:0},
+  Bug:{Grass:2,Psychic:2,Dark:2,Fire:0.5,Fighting:0.5,Poison:0.5,Flying:0.5,Ghost:0.5,Steel:0.5,Fairy:0.5},
+  Rock:{Fire:2,Ice:2,Flying:2,Bug:2,Fighting:0.5,Ground:0.5,Steel:0.5},
+  Ghost:{Ghost:2,Psychic:2,Dark:0.5,Normal:0},
+  Dragon:{Dragon:2,Steel:0.5,Fairy:0},
+  Dark:{Ghost:2,Psychic:2,Fighting:0.5,Dark:0.5,Fairy:0.5},
+  Steel:{Ice:2,Rock:2,Fairy:2,Fire:0.5,Water:0.5,Electric:0.5,Steel:0.5},
+  Fairy:{Fighting:2,Dragon:2,Dark:2,Fire:0.5,Poison:0.5,Steel:0.5}
+};
+const TYPES = Object.keys(CHART);
+
+function eff(atk, def) {
+  const v = CHART[atk][def];
+  return v === undefined ? 1 : v;
+}
+function fmtMult(m) {
+  return (m === 1 ? '1' : m).toString() + 'x';
+}
+function miniBadge(type, mult) {
+  return '<span class="mini-badge" style="background:' + T[type] + ';color:' + DARK[type] + ';">' +
+    type + ' ' + fmtMult(mult) + '</span>';
+}
+function breakdownHtml(atk, a, b) {
+  if (!b) return '';
+  return miniBadge(a, eff(atk, a)) + miniBadge(b, eff(atk, b));
+}
+function badge(name) {
+  return '<span class="badge" style="background:' + T[name] + ';color:' + DARK[name] + ';">' + name + '</span>';
+}
+function multBadgeStyle(mult) {
+  if (mult === 4) return { bg:'#e24b4a', tx:'#4a1010', label:'4x' };
+  if (mult === 2) return { bg:'#EF9F27', tx:'#412402', label:'2x' };
+  if (mult === 1) return { bg:'var(--surface-1)', tx:'var(--text-secondary)', label:'1x' };
+  if (mult === 0.5) return { bg:'#9FE1CB', tx:'#04342C', label:'0.5x' };
+  if (mult === 0.25) return { bg:'#B5D4F4', tx:'#042C53', label:'0.25x' };
+  return { bg:'#B4B2A9', tx:'#2C2C2A', label:'0x' };
+}
+function orGroup(prefix, types) {
+  return types.map(t => prefix + t.toLowerCase()).join(',');
+}
+function buildSearch(types, favOnly) {
+  if (types.length === 0) return '';
+  const slot1 = orGroup('@1', types);
+  const chargeAny = orGroup('@2', types) + ',' + orGroup('@3', types);
+  let str = slot1 + '&' + chargeAny;
+  if (favOnly) str += '&favorite';
+  return str;
+}
+function fallbackCopy(str, done) {
+  const ta = document.createElement('textarea');
+  ta.value = str;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  done();
+}
+function copyText(str, btn) {
+  const original = btn.textContent;
+  const done = () => {
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = original; }, 1400);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(str).then(done).catch(() => fallbackCopy(str, done));
+  } else {
+    fallbackCopy(str, done);
+  }
+}
+
+const t1 = document.getElementById('t1');
+const t2 = document.getElementById('t2');
+const rowsEl = document.getElementById('rows');
+const favCheckbox = document.getElementById('favOnly');
+const copyAllBtn = document.getElementById('copyAll');
+
+function populateT1(excludeType) {
+  const current = t1.value;
+  t1.innerHTML = '';
+  TYPES.filter(t => t !== excludeType).forEach(t => t1.appendChild(new Option(t, t)));
+  if (current && current !== excludeType) t1.value = current;
+}
+function populateT2(excludeType) {
+  const current = t2.value;
+  t2.innerHTML = '';
+  t2.appendChild(new Option('No second type', 'none'));
+  TYPES.filter(t => t !== excludeType).forEach(t => t2.appendChild(new Option(t, t)));
+  t2.value = (current && current !== excludeType) ? current : 'none';
+}
+
+populateT1(null);
+populateT2(null);
+t1.value = 'Water';
+populateT2('Water');
+t2.value = 'none';
+
+let currentWeakTypes = [];
+
+function render() {
+  const a = t1.value;
+  const b = t2.value === 'none' ? null : t2.value;
+
+  const results = TYPES.map(atk => ({
+    atk,
+    mult: b ? eff(atk, a) * eff(atk, b) : eff(atk, a)
+  })).sort((x, y) => y.mult - x.mult);
+
+  currentWeakTypes = results.filter(r => r.mult > 1).map(r => r.atk);
+
+  rowsEl.innerHTML = '';
+  results.forEach(r => {
+    const s = multBadgeStyle(r.mult);
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML =
+      '<div class="col1">' + badge(r.atk) + '</div>' +
+      '<div class="col2">' + breakdownHtml(r.atk, a, b) + '</div>' +
+      '<div class="col3"><span class="mult-badge" style="background:' + s.bg + ';color:' + s.tx + ';">' + s.label + '</span></div>';
+    rowsEl.appendChild(row);
+  });
+
+  copyAllBtn.disabled = currentWeakTypes.length === 0;
+  copyAllBtn.style.opacity = currentWeakTypes.length === 0 ? '0.5' : '1';
+}
+
+copyAllBtn.addEventListener('click', () => {
+  const str = buildSearch(currentWeakTypes, favCheckbox.checked);
+  if (str) copyText(str, copyAllBtn);
+});
+
+t1.addEventListener('change', () => {
+  populateT2(t1.value);
+  render();
+});
+t2.addEventListener('change', () => {
+  populateT1(t2.value === 'none' ? null : t2.value);
+  render();
+});
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
