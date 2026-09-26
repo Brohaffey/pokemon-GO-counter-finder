@@ -17,8 +17,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first: always try to fetch the latest version when online.
+// Only fall back to the cached copy if the network request fails (offline).
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        const resClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

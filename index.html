@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#F8D030">
 <link rel="icon" href="icon-192.png" type="image/png">
@@ -186,24 +189,24 @@ const DARK = { Normal:'#5c5c47', Fire:'#7a3212', Water:'#213a72', Electric:'#7a5
   Dark:'#241a12', Steel:'#3c3c50', Fairy:'#5c2436' };
 
 const CHART = {
-  Normal:{Rock:0.5,Steel:0.5,Ghost:0},
-  Fire:{Grass:2,Ice:2,Bug:2,Steel:2,Fire:0.5,Water:0.5,Rock:0.5,Dragon:0.5},
-  Water:{Fire:2,Ground:2,Rock:2,Water:0.5,Grass:0.5,Dragon:0.5},
-  Electric:{Water:2,Flying:2,Electric:0.5,Grass:0.5,Dragon:0.5,Ground:0},
-  Grass:{Water:2,Ground:2,Rock:2,Fire:0.5,Grass:0.5,Poison:0.5,Flying:0.5,Bug:0.5,Dragon:0.5,Steel:0.5},
-  Ice:{Grass:2,Ground:2,Flying:2,Dragon:2,Fire:0.5,Water:0.5,Ice:0.5,Steel:0.5},
-  Fighting:{Normal:2,Ice:2,Rock:2,Dark:2,Steel:2,Poison:0.5,Flying:0.5,Psychic:0.5,Bug:0.5,Fairy:0.5,Ghost:0},
-  Poison:{Grass:2,Fairy:2,Poison:0.5,Ground:0.5,Rock:0.5,Ghost:0.5,Steel:0},
-  Ground:{Fire:2,Electric:2,Poison:2,Rock:2,Steel:2,Grass:0.5,Bug:0.5,Flying:0},
-  Flying:{Grass:2,Fighting:2,Bug:2,Electric:0.5,Rock:0.5,Steel:0.5},
-  Psychic:{Fighting:2,Poison:2,Psychic:0.5,Steel:0.5,Dark:0},
-  Bug:{Grass:2,Psychic:2,Dark:2,Fire:0.5,Fighting:0.5,Poison:0.5,Flying:0.5,Ghost:0.5,Steel:0.5,Fairy:0.5},
-  Rock:{Fire:2,Ice:2,Flying:2,Bug:2,Fighting:0.5,Ground:0.5,Steel:0.5},
-  Ghost:{Ghost:2,Psychic:2,Dark:0.5,Normal:0},
-  Dragon:{Dragon:2,Steel:0.5,Fairy:0},
-  Dark:{Ghost:2,Psychic:2,Fighting:0.5,Dark:0.5,Fairy:0.5},
-  Steel:{Ice:2,Rock:2,Fairy:2,Fire:0.5,Water:0.5,Electric:0.5,Steel:0.5},
-  Fairy:{Fighting:2,Dragon:2,Dark:2,Fire:0.5,Poison:0.5,Steel:0.5}
+  Normal:{Rock:0.625,Steel:0.625,Ghost:0},
+  Fire:{Grass:1.6,Ice:1.6,Bug:1.6,Steel:1.6,Fire:0.625,Water:0.625,Rock:0.625,Dragon:0.625},
+  Water:{Fire:1.6,Ground:1.6,Rock:1.6,Water:0.625,Grass:0.625,Dragon:0.625},
+  Electric:{Water:1.6,Flying:1.6,Electric:0.625,Grass:0.625,Dragon:0.625,Ground:0},
+  Grass:{Water:1.6,Ground:1.6,Rock:1.6,Fire:0.625,Grass:0.625,Poison:0.625,Flying:0.625,Bug:0.625,Dragon:0.625,Steel:0.625},
+  Ice:{Grass:1.6,Ground:1.6,Flying:1.6,Dragon:1.6,Fire:0.625,Water:0.625,Ice:0.625,Steel:0.625},
+  Fighting:{Normal:1.6,Ice:1.6,Rock:1.6,Dark:1.6,Steel:1.6,Poison:0.625,Flying:0.625,Psychic:0.625,Bug:0.625,Fairy:0.625,Ghost:0},
+  Poison:{Grass:1.6,Fairy:1.6,Poison:0.625,Ground:0.625,Rock:0.625,Ghost:0.625,Steel:0},
+  Ground:{Fire:1.6,Electric:1.6,Poison:1.6,Rock:1.6,Steel:1.6,Grass:0.625,Bug:0.625,Flying:0},
+  Flying:{Grass:1.6,Fighting:1.6,Bug:1.6,Electric:0.625,Rock:0.625,Steel:0.625},
+  Psychic:{Fighting:1.6,Poison:1.6,Psychic:0.625,Steel:0.625,Dark:0},
+  Bug:{Grass:1.6,Psychic:1.6,Dark:1.6,Fire:0.625,Fighting:0.625,Poison:0.625,Flying:0.625,Ghost:0.625,Steel:0.625,Fairy:0.625},
+  Rock:{Fire:1.6,Ice:1.6,Flying:1.6,Bug:1.6,Fighting:0.625,Ground:0.625,Steel:0.625},
+  Ghost:{Ghost:1.6,Psychic:1.6,Dark:0.625,Normal:0},
+  Dragon:{Dragon:1.6,Steel:0.625,Fairy:0},
+  Dark:{Ghost:1.6,Psychic:1.6,Fighting:0.625,Dark:0.625,Fairy:0.625},
+  Steel:{Ice:1.6,Rock:1.6,Fairy:1.6,Fire:0.625,Water:0.625,Electric:0.625,Steel:0.625},
+  Fairy:{Fighting:1.6,Dragon:1.6,Dark:1.6,Fire:0.625,Poison:0.625,Steel:0.625}
 };
 const TYPES = Object.keys(CHART);
 
@@ -211,12 +214,9 @@ function eff(atk, def) {
   const v = CHART[atk][def];
   return v === undefined ? 1 : v;
 }
-function fmtMult(m) {
-  return (m === 1 ? '1' : m).toString() + 'x';
-}
 function miniBadge(type, mult) {
   return '<span class="mini-badge" style="background:' + T[type] + ';color:' + DARK[type] + ';">' +
-    type + ' ' + fmtMult(mult) + '</span>';
+    type + ' ' + fmtPercent(mult) + '</span>';
 }
 function breakdownHtml(atk, a, b) {
   if (!b) return '';
@@ -225,13 +225,19 @@ function breakdownHtml(atk, a, b) {
 function badge(name) {
   return '<span class="badge" style="background:' + T[name] + ';color:' + DARK[name] + ';">' + name + '</span>';
 }
+function fmtPercent(m) {
+  const pct = m * 100;
+  const rounded = Math.round(pct * 10) / 10;
+  return (Number.isInteger(rounded) ? rounded : rounded.toFixed(1)) + '%';
+}
 function multBadgeStyle(mult) {
-  if (mult === 4) return { bg:'#e24b4a', tx:'#4a1010', label:'4x' };
-  if (mult === 2) return { bg:'#EF9F27', tx:'#412402', label:'2x' };
-  if (mult === 1) return { bg:'var(--surface-1)', tx:'var(--text-secondary)', label:'1x' };
-  if (mult === 0.5) return { bg:'#9FE1CB', tx:'#04342C', label:'0.5x' };
-  if (mult === 0.25) return { bg:'#B5D4F4', tx:'#042C53', label:'0.25x' };
-  return { bg:'#B4B2A9', tx:'#2C2C2A', label:'0x' };
+  const label = fmtPercent(mult);
+  if (mult === 0) return { bg:'#B4B2A9', tx:'#2C2C2A', label };
+  if (mult >= 2) return { bg:'#e24b4a', tx:'#4a1010', label };
+  if (mult > 1) return { bg:'#EF9F27', tx:'#412402', label };
+  if (mult === 1) return { bg:'var(--surface-1)', tx:'var(--text-secondary)', label };
+  if (mult > 0.5) return { bg:'#9FE1CB', tx:'#04342C', label };
+  return { bg:'#B5D4F4', tx:'#042C53', label };
 }
 function orGroup(prefix, types) {
   return types.map(t => prefix + t.toLowerCase()).join(',');
